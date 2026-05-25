@@ -50,7 +50,17 @@ export default function UserProfile() {
               <Link href="/products" className="flex items-center gap-3 text-gray-500 font-medium hover:bg-gray-50 hover:text-[#1A1A1A] px-4 py-3 rounded-xl transition-colors">
                 <Heart size={20} /> المفضلات النادرة
               </Link>
-              <button onClick={() => window.location.href = '/auth'} className="w-full flex items-center gap-3 text-red-400 font-medium hover:bg-red-50 px-4 py-3 rounded-xl transition-colors mt-4 text-right">
+              <button
+                onClick={async () => {
+                  try {
+                    await fetch('/api/auth/logout', { method: 'POST' });
+                  } catch (err) {
+                    console.error('Logout error:', err);
+                  }
+                  window.location.href = '/auth';
+                }}
+                className="w-full flex items-center gap-3 text-red-400 font-medium hover:bg-red-50 px-4 py-3 rounded-xl transition-colors mt-4 text-right"
+              >
                 <LogOut size={20} /> تسجيل الخروج
               </button>
             </div>

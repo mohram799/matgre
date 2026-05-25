@@ -57,7 +57,8 @@ export async function middleware(req: NextRequest) {
       hostname !== 'localhost:3000' &&
       hostname !== 'localhost:3001' &&
       hostname !== '127.0.0.1:3000' &&
-      hostname !== '127.0.0.1:3001'
+      hostname !== '127.0.0.1:3001' &&
+      !hostname.endsWith('.vercel.app')
     ) {
       // Custom external domain mapping
       tenantSubdomain = hostname;
