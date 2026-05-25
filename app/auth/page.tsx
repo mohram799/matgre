@@ -7,31 +7,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 const COUNTRIES = [
-  { code: '+966', flag: '🇸🇦', name: 'السعودية',     abbr: 'SA' },
-  { code: '+971', flag: '🇦🇪', name: 'الإمارات',     abbr: 'AE' },
-  { code: '+974', flag: '🇶🇦', name: 'قطر',           abbr: 'QA' },
-  { code: '+973', flag: '🇧🇭', name: 'البحرين',       abbr: 'BH' },
-  { code: '+968', flag: '🇴🇲', name: 'عُمان',          abbr: 'OM' },
-  { code: '+965', flag: '🇰🇼', name: 'الكويت',        abbr: 'KW' },
-  { code: '+962', flag: '🇯🇴', name: 'الأردن',        abbr: 'JO' },
-  { code: '+961', flag: '🇱🇧', name: 'لبنان',         abbr: 'LB' },
-  { code: '+20',  flag: '🇪🇬', name: 'مصر',           abbr: 'EG' },
-  { code: '+212', flag: '🇲🇦', name: 'المغرب',        abbr: 'MA' },
-  { code: '+216', flag: '🇹🇳', name: 'تونس',          abbr: 'TN' },
-  { code: '+213', flag: '🇩🇿', name: 'الجزائر',       abbr: 'DZ' },
-  { code: '+218', flag: '🇱🇾', name: 'ليبيا',         abbr: 'LY' },
-  { code: '+249', flag: '🇸🇩', name: 'السودان',       abbr: 'SD' },
-  { code: '+963', flag: '🇸🇾', name: 'سوريا',         abbr: 'SY' },
-  { code: '+964', flag: '🇮🇶', name: 'العراق',        abbr: 'IQ' },
-  { code: '+967', flag: '🇾🇪', name: 'اليمن',         abbr: 'YE' },
-  { code: '+90',  flag: '🇹🇷', name: 'تركيا',         abbr: 'TR' },
-  { code: '+44',  flag: '🇬🇧', name: 'بريطانيا',      abbr: 'GB' },
-  { code: '+33',  flag: '🇫🇷', name: 'فرنسا',         abbr: 'FR' },
-  { code: '+49',  flag: '🇩🇪', name: 'ألمانيا',       abbr: 'DE' },
-  { code: '+1',   flag: '🇺🇸', name: 'أمريكا',        abbr: 'US' },
-  { code: '+86',  flag: '🇨🇳', name: 'الصين',         abbr: 'CN' },
-  { code: '+81',  flag: '🇯🇵', name: 'اليابان',       abbr: 'JP' },
-  { code: '+91',  flag: '🇮🇳', name: 'الهند',         abbr: 'IN' },
+  { code: '+966', flag: '🇸🇦', name: 'المملكة العربية السعودية', abbr: 'SA' },
+  { code: '+20',  flag: '🇪🇬', name: 'جمهورية مصر العربية',     abbr: 'EG' },
+  { code: '+971', flag: '🇦🇪', name: 'الإمارات العربية المتحدة', abbr: 'AE' },
+  { code: '+974', flag: '🇶🇦', name: 'دولة قطر',              abbr: 'QA' },
+  { code: '+973', flag: '🇧🇭', name: 'مملكة البحرين',          abbr: 'BH' },
+  { code: '+965', flag: '🇰🇼', name: 'دولة الكويت',            abbr: 'KW' },
+  { code: '+968', flag: '🇴🇲', name: 'سلطنة عُمان',            abbr: 'OM' },
 ];
 
 export default function AuthPage() {
@@ -339,11 +321,10 @@ export default function AuthPage() {
                     <button
                       type="button"
                       onClick={() => setCountryDropdownOpen(v => !v)}
-                      className="h-full border-r border-gray-200/60 px-3 flex items-center gap-1.5 text-gray-700 font-bold text-xs select-none font-sans bg-gray-50/20 hover:bg-gray-100/40 transition-colors min-w-[80px] shrink-0"
+                      className="h-full border-r border-gray-200/60 px-4 flex items-center gap-2 text-[#1A1A1A] font-bold text-xs select-none font-sans bg-transparent hover:bg-gray-50/50 transition-colors min-w-[95px] shrink-0"
                     >
-                      <span className="text-base leading-none">{selectedCountry.flag}</span>
-                      <span className="font-sans text-gray-600 text-[11px] font-semibold">{selectedCountry.code}</span>
-                      <ChevronDown size={12} className={`text-gray-400 transition-transform duration-200 ${countryDropdownOpen ? 'rotate-180' : ''}`} />
+                      <span className="font-sans text-gray-800 text-xs font-bold whitespace-nowrap">{selectedCountry.abbr} {selectedCountry.code}</span>
+                      <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${countryDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {/* Dropdown List */}
@@ -353,12 +334,12 @@ export default function AuthPage() {
                           initial={{ opacity: 0, y: -8, scale: 0.96 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                          className="absolute top-full left-0 mt-2 w-52 bg-white/95 backdrop-blur-xl border border-gray-200/60 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] z-[200] overflow-hidden"
+                          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                          className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-[0_15px_45px_rgba(0,0,0,0.06)] z-[200] overflow-hidden"
                           dir="rtl"
                         >
                           {/* Scrollable list */}
-                          <div className="max-h-64 overflow-y-auto py-1 custom-scrollbar">
+                          <div className="max-h-60 overflow-y-auto py-1 custom-scrollbar">
                             {COUNTRIES.map((country) => (
                               <button
                                 key={country.abbr}
@@ -367,14 +348,14 @@ export default function AuthPage() {
                                   setSelectedCountry(country);
                                   setCountryDropdownOpen(false);
                                 }}
-                                className={`w-full flex items-center gap-3 px-4 py-2.5 text-right transition-colors hover:bg-[#C5A059]/8 ${
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-right transition-all duration-300 hover:bg-[#C5A059]/5 hover:text-[#C5A059] ${
                                   selectedCountry.abbr === country.abbr
-                                    ? 'bg-[#C5A059]/10 text-[#C5A059]'
-                                    : 'text-gray-700'
+                                    ? 'bg-[#C5A059]/5 text-[#C5A059] font-bold'
+                                    : 'text-gray-700 font-medium'
                                 }`}
                               >
                                 <span className="text-lg shrink-0">{country.flag}</span>
-                                <span className="flex-1 text-xs font-bold font-arabic truncate">{country.name}</span>
+                                <span className="flex-1 text-xs font-arabic truncate">{country.name}</span>
                                 <span className="text-[10px] font-sans font-bold text-gray-400 shrink-0">{country.code}</span>
                               </button>
                             ))}
