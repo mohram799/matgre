@@ -13,6 +13,7 @@
         "@react-three/postprocessing": "^2.16.2",
         "@sentry/nextjs": "^10.53.1",
         "@studio-freight/react-lenis": "^0.0.47",
+        "@supabase/supabase-js": "^2.106.1",
         "bullmq": "^5.77.1",
         "clsx": "^2.1.1",
         "framer-motion": "^11.2.4",
