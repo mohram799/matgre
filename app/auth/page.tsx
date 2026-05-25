@@ -48,6 +48,14 @@ export default function AuthPage() {
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
   const countryDropdownRef = useRef<HTMLDivElement>(null);
 
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
   const router = useRouter();
 
   useEffect(() => {
@@ -79,14 +87,80 @@ export default function AuthPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate luxury authentication process
-    setTimeout(() => {
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    const cleanPhone = phone.trim().replace(/^0+/, '');
+    const fullPhone = `${selectedCountry.code}${cleanPhone}`;
+
+    try {
+      if (!isLogin) {
+        // Register flow
+        if (passwordValue !== confirmPassword) {
+          setErrorMsg('الرموز السرية المدخلة غير متطابقة');
+          setIsLoading(false);
+          return;
+        }
+
+        const res = await fetch('/api/auth/customer-register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: fullPhone,
+            name: `${firstName} ${lastName}`.trim(),
+            email: email.trim() || null,
+            password: passwordValue,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          setErrorMsg(data.error || 'فشل تفعيل العضوية');
+          setIsLoading(false);
+          return;
+        }
+
+        localStorage.setItem('shamikh_customer_session', JSON.stringify(data.user));
+        // Clear local custom orders cache so it re-syncs cleanly
+        localStorage.removeItem('shamikh_orders');
+        setSuccessMsg(data.message);
+        setTimeout(() => {
+          router.push('/profile');
+        }, 1000);
+      } else {
+        // Login flow
+        const res = await fetch('/api/auth/customer-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: fullPhone,
+            password: passwordValue,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          setErrorMsg(data.error || 'فشل تسجيل الدخول');
+          setIsLoading(false);
+          return;
+        }
+
+        localStorage.setItem('shamikh_customer_session', JSON.stringify(data.user));
+        // Clear local custom orders cache so it re-syncs cleanly
+        localStorage.removeItem('shamikh_orders');
+        setSuccessMsg(data.message);
+        setTimeout(() => {
+          router.push('/profile');
+        }, 1000);
+      }
+    } catch (err: any) {
+      console.error('Authentication error:', err);
+      setErrorMsg('حدث خطأ في الاتصال بالخادم السحابي للمنصة');
       setIsLoading(false);
-      router.push('/profile');
-    }, 2000);
+    }
   };
 
   return (
@@ -192,6 +266,24 @@ export default function AuthPage() {
 
           {/* ─── FORM CONTENT ─── */}
           <AnimatePresence mode="wait">
+            {errorMsg && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }} 
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-50/80 border border-red-200 text-red-600 px-5 py-3 rounded-2xl text-xs font-bold text-center mb-4 font-arabic"
+              >
+                ⚠️ {errorMsg}
+              </motion.div>
+            )}
+            {successMsg && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }} 
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-green-50/80 border border-green-200 text-green-600 px-5 py-3 rounded-2xl text-xs font-bold text-center mb-4 font-arabic animate-pulse"
+              >
+                👑 {successMsg}
+              </motion.div>
+            )}
             <motion.form 
               key={isLogin ? 'login' : 'register'}
               initial={{ opacity: 0, y: 12 }}
@@ -212,6 +304,8 @@ export default function AuthPage() {
                         type="text" 
                         placeholder="مثال: محمد" 
                         autoComplete="given-name"
+                        value={firstName}
+                        onChange={e => setFirstName(e.target.value)}
                         className="w-full bg-transparent py-4 pr-11 pl-4 text-[#1A1A1A] text-sm font-arabic focus:outline-none transition-all placeholder:text-gray-300" 
                         required 
                       />
@@ -225,6 +319,8 @@ export default function AuthPage() {
                         type="text" 
                         placeholder="مثال: السالم" 
                         autoComplete="family-name"
+                        value={lastName}
+                        onChange={e => setLastName(e.target.value)}
                         className="w-full bg-transparent py-4 pr-11 pl-4 text-[#1A1A1A] text-sm font-arabic focus:outline-none transition-all placeholder:text-gray-300" 
                         required 
                       />
@@ -295,6 +391,8 @@ export default function AuthPage() {
                       type="tel" 
                       placeholder="5X XXX XXXX" 
                       autoComplete="tel"
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
                       className="w-full bg-transparent py-4 pr-11 pl-4 text-[#1A1A1A] text-sm font-sans focus:outline-none transition-all placeholder:text-gray-300" 
                       required 
                     />
@@ -313,6 +411,8 @@ export default function AuthPage() {
                       type="email" 
                       placeholder="vip@example.com" 
                       autoComplete="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
                       className="w-full bg-transparent py-4 pr-11 pl-4 text-[#1A1A1A] text-sm font-sans focus:outline-none transition-all placeholder:text-gray-300" 
                     />
                   </div>
@@ -381,6 +481,8 @@ export default function AuthPage() {
                     <input 
                       type={showConfirmPassword ? 'text' : 'password'} 
                       placeholder="••••••••" 
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
                       autoComplete="new-password"
                       className="w-full bg-transparent py-4 pr-11 pl-12 text-[#1A1A1A] text-sm font-sans focus:outline-none transition-all placeholder:text-gray-300 font-mono tracking-[0.2em]" 
                       required 

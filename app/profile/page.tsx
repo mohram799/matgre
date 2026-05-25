@@ -4,15 +4,71 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Package, MapPin, Heart, LogOut, ShieldCheck, Clock, ArrowRight, Truck, Settings } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ProductDb, Order } from '@/components/ProductDb';
 
-
 export default function UserProfile() {
+  const router = useRouter();
+  const [userSession, setUserSession] = useState<{
+    id: string;
+    name: string;
+    phone: string;
+    email?: string;
+    vip_tier?: string;
+    total_spent?: number;
+  } | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setOrders(ProductDb.getOrders());
-  }, []);
+    if (typeof window === 'undefined') return;
+    
+    const sessionStr = localStorage.getItem('shamikh_customer_session');
+    if (!sessionStr) {
+      router.push('/auth');
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(sessionStr);
+      setUserSession(parsed);
+      
+      // Load current local orders
+      const storedOrders = localStorage.getItem('shamikh_orders');
+      if (storedOrders) {
+        setOrders(JSON.parse(storedOrders));
+      } else {
+        setOrders([]);
+      }
+      
+      setIsLoading(false);
+      
+      // Sync fresh orders from Supabase using user phone
+      ProductDb.syncOrdersFromSupabase();
+    } catch (e) {
+      console.error(e);
+      router.push('/auth');
+    }
+
+    // Listen to updates from background order synchronization
+    const handleOrdersUpdated = () => {
+      const storedOrders = localStorage.getItem('shamikh_orders');
+      if (storedOrders) {
+        setOrders(JSON.parse(storedOrders));
+      }
+    };
+
+    window.addEventListener('shamikh_orders_updated', handleOrdersUpdated);
+    return () => window.removeEventListener('shamikh_orders_updated', handleOrdersUpdated);
+  }, [router]);
+
+  if (isLoading || !userSession) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] flex flex-col justify-center items-center font-sans" dir="rtl">
+        <p className="text-xs text-[#C5A059] tracking-widest uppercase font-bold animate-pulse font-arabic">جاري التحقق من التشفير الأمني للعضوية...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] font-sans pt-32 pb-20" dir="rtl">
@@ -29,12 +85,17 @@ export default function UserProfile() {
         {/* Sidebar */}
         <div className="w-full md:w-1/4">
           <div className="bg-white p-8 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.03)] border border-gray-100">
-            <div className="w-20 h-20 bg-[#1A1A1A] text-white rounded-full flex items-center justify-center text-3xl font-light mb-6 shadow-xl">
-              م
+            <div className="w-20 h-20 bg-[#1A1A1A] text-white rounded-full flex items-center justify-center text-3xl font-light mb-6 shadow-xl font-arabic">
+              {userSession.name ? userSession.name.charAt(0).toUpperCase() : 'ع'}
             </div>
-            <h2 className="text-2xl font-bold text-[#1A1A1A] mb-1">محمد آل سعود</h2>
-            <p className="text-[#C5A059] text-sm font-bold tracking-widest uppercase mb-8 flex items-center gap-1">
-              <ShieldCheck size={16} /> عضوية VIP الماسية
+            <h2 className="text-2xl font-bold text-[#1A1A1A] mb-1 font-arabic">{userSession.name}</h2>
+            <p className="text-[#C5A059] text-sm font-bold tracking-widest uppercase mb-8 flex items-center gap-1 font-arabic">
+              <ShieldCheck size={16} /> 
+              {userSession.vip_tier === 'diamond' ? 'عضوية VIP الماسية' :
+               userSession.vip_tier === 'gold' ? 'عضوية VIP الذهبية' :
+               userSession.vip_tier === 'silver' ? 'عضوية VIP الفضية' :
+               userSession.vip_tier === 'bronze' ? 'عضوية VIP الكفو' :
+               'عضوية ضيف فاخر'}
             </p>
 
             <div className="flex flex-col gap-2">
@@ -57,6 +118,8 @@ export default function UserProfile() {
                   } catch (err) {
                     console.error('Logout error:', err);
                   }
+                  localStorage.removeItem('shamikh_customer_session');
+                  localStorage.removeItem('shamikh_orders');
                   window.location.href = '/auth';
                 }}
                 className="w-full flex items-center gap-3 text-red-400 font-medium hover:bg-red-50 px-4 py-3 rounded-xl transition-colors mt-4 text-right"
